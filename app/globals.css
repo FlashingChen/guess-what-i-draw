@@ -1,0 +1,14 @@
+@import "tailwindcss";
+
+html,
+body {
+  height: 100%;
+  /* 手机上画到边缘时不要触发页面回弹，否则笔画会被打断 */
+  overscroll-behavior: none;
+}
+
+body {
+  margin: 0;
+  background-color: #f1f5f9;
+  -webkit-tap-highlight-color: transparent;
+}
