@@ -6,6 +6,14 @@
 
 ![界面截图](docs/screenshot.png)
 
+## 在线地址
+
+**https://guess-what-i-draw-iq0gtorm.edgeone.cool**
+
+部署在 EdgeOne Makers 海外区（`Area: global`）。
+
+⚠️ **中国大陆网络环境下访问受限**：按 EdgeOne 的合规策略，大陆网络必须使用控制台生成的预览链接访问，该链接 **3 小时过期**，过期后返回 401；**非中国大陆网络可直接访问**。如果需要一个稳定免续期的入口，建议绑定自定义域名（加速区域选「全球可用区（不含中国大陆）」时无需备案）。
+
 ## 它能做什么
 
 - **原生 Canvas 画板**：8 色 / 3 档笔宽 / 橡皮 / 撤销 / 二次确认清空
@@ -60,11 +68,22 @@ pnpm dev                           # 打开 http://localhost:3000
 ## 部署到 EdgeOne Makers
 
 ```bash
-edgeone login -s global
-edgeone makers deploy . -n <项目名> --area global
+edgeone makers deploy . -n <项目名> --area overseas
 ```
 
-部署后**必须**在 EdgeOne 控制台的「环境变量」里补上 `DEEPSEEK_API_KEY`，否则接口会返回「服务端没有读到 DEEPSEEK_API_KEY」。密钥不要写进 `edgeone.json`。
+`--area` 只有 `global` 与 `overseas` 两个取值，它们**是同一个值**（CLI 内部映射 `overseas → "global"`），都指向海外区。
+
+两个已经踩过的坑：
+
+1. **构建镜像里没有 pnpm。** `package.json` 里的 `packageManager: "pnpm@11.7.0"` 会让 corepack 去联网拉 pnpm，拉不到就直接失败（表现为构建约 17 秒后 `Code: 18`，且不打印任何构建日志）。所以 `edgeone.json` 的 `installCommand` / `buildCommand` 改用镜像自带的 npm。
+2. **环境变量必须在部署前设好，或设完重新部署。** 首次部署后我设置了 `DEEPSEEK_API_KEY`，但运行中的部署读不到，接口一直返回 `MISSING_KEY`，重新部署后才生效。
+
+密钥不要写进 `edgeone.json`（会进 Git）。用 CLI 设置，注意 `env ls` 会**明文回显**变量值，别在有录屏/日志的终端里执行：
+
+```bash
+edgeone makers env set DEEPSEEK_API_KEY <key> -e production
+edgeone makers deploy . -n <项目名> --area overseas   # 重新部署使变量生效
+```
 
 ## 设计文档
 
